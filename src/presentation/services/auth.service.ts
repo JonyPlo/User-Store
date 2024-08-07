@@ -1,5 +1,5 @@
 import { UserModel } from '../../data'
-import { CustomError, RegisterUserDto } from '../../domain'
+import { CustomError, RegisterUserDto, UserEntity } from '../../domain'
 
 export class AuthService {
   constructor() {}
@@ -13,6 +13,21 @@ export class AuthService {
       )
     }
 
-    return 'todo ok'
+    try {
+      const user = new UserModel(registerUserDto!)
+      await user.save()
+
+      // Encriptar password
+
+      // JWT
+
+      // Email de confirmacion
+
+      const { password, ...rest } = UserEntity.fromObject(user)
+
+      return { user: rest, token: 'ABC' }
+    } catch (error) {
+      throw CustomError.internalServer(`${error}`)
+    }
   }
 }
