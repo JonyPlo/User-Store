@@ -1,3 +1,4 @@
+import { bcryptAdapter } from '../../config'
 import { UserModel } from '../../data'
 import { CustomError, RegisterUserDto, UserEntity } from '../../domain'
 
@@ -15,9 +16,10 @@ export class AuthService {
 
     try {
       const user = new UserModel(registerUserDto!)
-      await user.save()
-
+      
       // Encriptar password
+      user.password = bcryptAdapter.hash(registerUserDto.password)
+      await user.save()
 
       // JWT
 
