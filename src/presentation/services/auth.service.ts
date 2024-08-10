@@ -1,6 +1,11 @@
-import { bcryptAdapter } from '../../config'
+import { bcryptAdapter, JwtAdapter } from '../../config'
 import { UserModel } from '../../data'
-import { CustomError, RegisterUserDto, UserEntity } from '../../domain'
+import {
+  CustomError,
+  LoginUserDto,
+  RegisterUserDto,
+  UserEntity,
+} from '../../domain'
 
 export class AuthService {
   constructor() {}
@@ -16,7 +21,7 @@ export class AuthService {
 
     try {
       const user = new UserModel(registerUserDto!)
-      
+
       // Encriptar password
       user.password = bcryptAdapter.hash(registerUserDto.password)
       await user.save()
@@ -30,6 +35,27 @@ export class AuthService {
       return { user: rest, token: 'ABC' }
     } catch (error) {
       throw CustomError.internalServer(`${error}`)
+    }
+  }
+
+  public async loginUser(loginUserDto: LoginUserDto) {
+    const userFound = await UserModel.findOne({ email: loginUserDto.email })
+    if (!userFound) throw CustomError.badRequest('User not found')
+
+    const isPasswordMatch = bcryptAdapter.compare(
+      loginUserDto.password,
+      userFound.password
+    )
+    if (!isPasswordMatch) throw CustomError.badRequest('Invalid credentials')
+
+    const { password, ...rest } = UserEntity.fromObject(userFound)
+
+    const token = await JwtAdapter.generateToken({ id: userFound.id })
+    if (!token) throw CustomError.internalServer('Error generate token')
+
+    return {
+      user: rest,
+      token,
     }
   }
 }
