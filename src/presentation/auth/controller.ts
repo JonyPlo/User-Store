@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { CustomError, LoginUserDto, RegisterUserDto } from '../../domain'
 import { AuthService } from '../services/auth.service'
+import { JwtAdapter } from '../../config'
 
 export class AuthController {
   constructor(public readonly authService: AuthService) {}
@@ -35,6 +36,11 @@ export class AuthController {
   }
 
   validateEmail = (req: Request, res: Response) => {
-    res.json('validateEmail')
+    const { token } = req.params
+
+    this.authService
+      .validateEmail(token)
+      .then(() => res.status(200).json('Email validated'))
+      .catch((error) => this.handleError(error, res))
   }
 }
