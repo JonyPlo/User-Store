@@ -7,7 +7,7 @@ const categorySchema = new Schema({
   },
   available: {
     type: Boolean,
-    default: true,
+    default: false,
   },
   user: {
     type: Schema.Types.ObjectId,
